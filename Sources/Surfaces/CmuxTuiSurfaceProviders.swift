@@ -169,15 +169,12 @@ final class CmuxTuiSurfaceProvider: SurfaceProvider {
             refreshCloudBrowserRoutes()
         }
     }
-    func stop() async {
-        suspendForFeatureFlag()
-        await portAccessStore.remove(machineID: machineID)
-    }
     func suspendForFeatureFlag() {
         isFeatureSuspended = true
         guestURLService?.stop()
         guestURLService = nil
         lifecycleGeneration &+= 1
+        terminalMutationQueue.cancelAll()
         refreshCoordinator.cancel()
         for task in browserPaneTasks.values { task.cancel() }
         browserPaneTasks.removeAll()
