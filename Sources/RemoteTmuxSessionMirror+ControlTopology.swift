@@ -1,3 +1,4 @@
+import CmuxSurfaceCatalogModel
 import Bonsplit
 import CmuxRemoteSession
 import Foundation

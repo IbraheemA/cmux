@@ -1,3 +1,4 @@
+import CmuxSurfaceCatalogModel
 import CmuxFoundation
 import CmuxSettings
 import Foundation

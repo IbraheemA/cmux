@@ -1,3 +1,4 @@
+import CmuxSurfaceCatalogModel
 /// Why a pane's projection ended. Only a pane closed on purpose edits the machine's
 /// layout; a workspace going away and a pane the app replaced itself never do.
 enum SurfaceProjectionEndReason: Sendable {
