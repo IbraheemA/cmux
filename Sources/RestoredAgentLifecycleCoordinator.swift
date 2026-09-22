@@ -79,6 +79,10 @@ final class RestoredAgentLifecycleCoordinator {
         }
     }
 
+    func hasRetryableRestoreIntent(panelId: UUID) -> Bool {
+        resumeStatesByPanelId[panelId] == .manualResumeAvailable
+    }
+
     /// Prunes lifecycle state in one bounded pass when the owning topology is bulk-replaced.
     func retainSessionRestores(for validPanelIds: Set<UUID>) {
         resumeStatesByPanelId = resumeStatesByPanelId.filter { validPanelIds.contains($0.key) }

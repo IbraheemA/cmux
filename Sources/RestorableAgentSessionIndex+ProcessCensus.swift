@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 
 /// Process-backed index loading shares census ownership and preserves cancellation.
@@ -42,6 +43,32 @@ extension RestorableAgentSessionIndex {
             registry: registry,
             detectedSnapshots: detectedSnapshots,
             hibernationProcessScopes: hibernationProcessScopes
+        )
+    }
+
+    /// Revalidates retained owners before deferred restore admission. Cached
+    /// PID evidence may be stale by the time the shared index finishes loading.
+    func hasDeferredRestoreProcessConflict(
+        workspaceId: UUID,
+        panelId: UUID,
+        processIdentityProvider: (Int) -> AgentPIDProcessIdentity? = {
+            guard $0 > 0, $0 <= Int(Int32.max) else { return nil }
+            return AgentPIDProcessIdentity(pid: pid_t($0))
+        },
+        processPresenceProvider: (Int) -> PIDPresence = {
+            guard $0 > 0, $0 <= Int(Int32.max) else { return .absent }
+            return PIDPresence.current(pid: pid_t($0))
+        }
+    ) -> Bool {
+        hasCurrentAmbiguousPanel(
+            panelId,
+            processIdentityProvider: processIdentityProvider,
+            processPresenceProvider: processPresenceProvider
+        ) || hasCurrentLiveProcessForStablePanel(
+            workspaceId: workspaceId,
+            panelId: panelId,
+            processIdentityProvider: processIdentityProvider,
+            processPresenceProvider: processPresenceProvider
         )
     }
 }

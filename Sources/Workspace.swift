@@ -583,13 +583,13 @@ extension Workspace {
                     ? sessionRestorePolicy.restorableTmuxStartCommand(terminalPanel.surface.debugTmuxStartCommand())
                     : nil)
             let agentWasRunning: Bool? = {
-                // A queued cmux-authored selector is durable intent before any
-                // process can exist. Once shell activity starts, the ordinary
-                // binding and process evidence below becomes authoritative.
+                let hasRetryableRestore = restoredAgentLifecycle.hasRetryableRestoreIntent(panelId: panelId) &&
+                    ((resumeBinding?.isAgentHookBinding == true && resumeBinding?.autoResume == true) ||
+                        (resumeBinding == nil && effectiveRestorableAgent != nil))
                 if restoredAgentLifecycle.hasQueuedRestoreIntent(
                     panelId: panelId,
                     matching: effectiveRestorableAgent
-                ) {
+                ) || hasRetryableRestore {
                     return true
                 }
                 if let resumeBinding, resumeBinding.isAgentHookBinding {

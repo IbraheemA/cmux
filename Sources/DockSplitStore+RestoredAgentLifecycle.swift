@@ -565,30 +565,13 @@ extension DockSplitStore {
                 )
                 continue
             }
-            // Deferred admission has no exact-owner snapshot that can override a
-            // stable-panel tie, so structural ambiguity remains fail-closed even
-            // after the old owners' PIDs have exited.
-            let ownershipIsBlocked = index.hasAmbiguousPanel(ownershipPanelID) ||
-                index.hasCurrentAmbiguousPanel(
-                    ownershipPanelID,
-                    revalidateProcessEvidence: false
-                ) ||
-                index.hasUncertainStablePanelEntry(
-                    panelId: ownershipPanelID,
-                    revalidateProcessEvidence: false
-                ) ||
-                index.hasConflictingLiveStablePanelEntry(
-                    workspaceId: workspaceId,
-                    panelId: ownershipPanelID,
-                    expectedKind: expectedKind,
-                    expectedSessionId: expectedSessionId,
-                    revalidateProcessEvidence: false
-                ) ||
-                index.hasCurrentLiveProcessForStablePanel(
-                    workspaceId: workspaceId,
-                    panelId: ownershipPanelID,
-                    revalidateProcessEvidence: false
-                )
+            // Cached owners can exit between the shared index scan and final
+            // admission. Revalidate now instead of suppressing a valid restore
+            // with stale PID evidence.
+            let ownershipIsBlocked = index.hasDeferredRestoreProcessConflict(
+                workspaceId: workspaceId,
+                panelId: ownershipPanelID
+            )
             guard !ownershipIsBlocked else {
                 cancelDeferredAgentResumeRestore(panelId: panelId, restore: restore)
                 continue
